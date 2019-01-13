@@ -52,6 +52,7 @@ public class MainClass {
 	private static final String OPTION_PLATFORMS_DIR = "p";
 	private static final String OPTION_SOURCES_SINKS_FILE = "s";
 	private static final String OPTION_OUTPUT_FILE = "o";
+	private static final String OPTION_JSON_FILE = "j";
 
 	// Timeouts
 	private static final String OPTION_TIMEOUT = "dt";
@@ -116,6 +117,7 @@ public class MainClass {
 				"Path to the platforms directory from the Android SDK");
 		options.addOption(OPTION_SOURCES_SINKS_FILE, "sourcessinksfile", true, "Definition file for sources and sinks");
 		options.addOption(OPTION_OUTPUT_FILE, "outputfile", true, "Output XML file for the discovered data flows");
+		options.addOption(OPTION_JSON_FILE, "jsonfile", true, "Output JSON file for the discovered data flows");
 
 		// Timeouts
 		options.addOption(OPTION_TIMEOUT, "timeout", true, "Timeout for the main data flow analysis");
@@ -520,6 +522,11 @@ public class MainClass {
 			String outputFile = cmd.getOptionValue(OPTION_OUTPUT_FILE);
 			if (outputFile != null && !outputFile.isEmpty())
 				config.getAnalysisFileConfig().setOutputFile(outputFile);
+		}
+		{
+			String jsonFile = cmd.getOptionValue(OPTION_JSON_FILE);
+			if (jsonFile != null && !jsonFile.isEmpty())
+				config.getAnalysisFileConfig().setJsonFile(jsonFile);
 		}
 
 		// Timeouts
