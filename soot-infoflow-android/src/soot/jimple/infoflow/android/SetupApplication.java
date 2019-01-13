@@ -87,6 +87,7 @@ import soot.jimple.infoflow.memory.FlowDroidMemoryWatcher;
 import soot.jimple.infoflow.memory.FlowDroidTimeoutWatcher;
 import soot.jimple.infoflow.memory.IMemoryBoundedSolver;
 import soot.jimple.infoflow.results.InfoflowResults;
+import soot.jimple.infoflow.results.json.InfoflowResultsSerializerJson;
 import soot.jimple.infoflow.rifl.RIFLSourceSinkDefinitionProvider;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
 import soot.jimple.infoflow.solver.memory.IMemoryManager;
@@ -1080,6 +1081,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 			sootConfig.setSootOptions(Options.v(), config);
 
 		Options.v().set_soot_classpath(getClasspath());
+		Options.v().set_keep_line_number(true);
 		Main.v().autoSetOptions();
 		configureCallgraph();
 
@@ -1128,6 +1130,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 		}
 		if (config.getEnableReflection())
 			Options.v().setPhaseOption("cg", "types-for-invoke:true");
+		Options.v().set_keep_line_number(true);
 	}
 
 	/**
@@ -1453,6 +1456,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 	 */
 	private void serializeResults(InfoflowResults results, IInfoflowCFG cfg) {
 		String resultsFile = config.getAnalysisFileConfig().getOutputFile();
+		String jsonFile = config.getAnalysisFileConfig().getJsonFile();
 		if (resultsFile != null && !resultsFile.isEmpty()) {
 			InfoflowResultsSerializer serializer = new InfoflowResultsSerializer(cfg, config);
 			try {
@@ -1461,6 +1465,19 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 				System.err.println("Could not write data flow results to file: " + ex.getMessage());
 				ex.printStackTrace();
 			} catch (XMLStreamException ex) {
+				System.err.println("Could not write data flow results to file: " + ex.getMessage());
+				ex.printStackTrace();
+			}
+		}
+		// only for the benchmark inspections
+		if (jsonFile != null && !jsonFile.isEmpty()) {
+			InfoflowResultsSerializerJson serializerJson = new InfoflowResultsSerializerJson(cfg, config);
+			try {
+				serializerJson.serialize(results, jsonFile);
+			} catch (FileNotFoundException ex) {
+				System.err.println("Could not write data flow results to file: " + ex.getMessage());
+				ex.printStackTrace();
+			} catch (IOException ex) {
 				System.err.println("Could not write data flow results to file: " + ex.getMessage());
 				ex.printStackTrace();
 			}
