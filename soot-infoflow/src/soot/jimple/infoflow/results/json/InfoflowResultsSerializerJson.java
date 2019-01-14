@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.results.InfoflowResults;
 import soot.jimple.infoflow.results.ResultSinkInfo;
@@ -70,24 +71,37 @@ public class InfoflowResultsSerializerJson {
 				JSONObject sink_result = new JSONObject();
 				MethodSourceSinkDefinition def = (MethodSourceSinkDefinition) res.getDefinition();
 				sink_result.put(JsonConstants.result, i);
-				sink_result.put(JsonConstants.sink_stm, def.getMethod().getSignature());
+				sink_result.put(JsonConstants.sink_stm, res.getStmt().toString());
 				String classN = icfg.getMethodOf(res.getStmt()).getDeclaringClass().getName();
 				sink_result.put(JsonConstants.sink_class, classN);
 				sink_result.put(JsonConstants.sink_line, (res.getStmt()).getTag("LineNumberTag"));
-				// sink_result.put(JsonConstants.sink_line_java,
-				// (res.getStmt()).getJavaSourceStartLineNumber());
+				if (def.getMethod() != null)
+					sink_result.put(JsonConstants.sink_method, (def.getMethod().getSignature()));
+
 				JSONArray sources = new JSONArray();
 				int i2 = 1;
 				for (ResultSourceInfo res2 : map.get(res)) {
 					JSONObject source_result = new JSONObject();
 					MethodSourceSinkDefinition def2 = (MethodSourceSinkDefinition) res2.getDefinition();
 					source_result.put(JsonConstants.source, i2);
-					source_result.put(JsonConstants.source_stm, def2.getMethod().getSignature());
+					source_result.put(JsonConstants.source_stm, res2.getStmt().toString());
 					String classN2 = icfg.getMethodOf(res2.getStmt()).getDeclaringClass().getName();
 					source_result.put(JsonConstants.source_class, classN2);
+					if (def2.getMethod() != null)
+						source_result.put(JsonConstants.source_method, (def2.getMethod().getSignature()));
 					source_result.put(JsonConstants.source_line, res2.getStmt().getTag("LineNumberTag"));
-					// source_result.put(JsonConstants.source_line_java,
-					// (res2.getStmt()).getJavaSourceStartLineNumber());
+
+					JSONArray path = new JSONArray();
+					int order = 1;
+					for (Stmt s : res2.getPath()) {
+						JSONObject stm_path = new JSONObject();
+						stm_path.put(order, s.toString());
+						order++;
+						path.add(stm_path);
+					}
+
+					if (!path.isEmpty())
+						source_result.put(JsonConstants.path, path);
 					i2++;
 					sources.add(source_result);
 				}
