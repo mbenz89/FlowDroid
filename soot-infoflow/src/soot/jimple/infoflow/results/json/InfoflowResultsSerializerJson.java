@@ -77,6 +77,10 @@ public class InfoflowResultsSerializerJson {
 				sink_result.put(JsonConstants.sink_line, (res.getStmt()).getTag("LineNumberTag"));
 				if (def.getMethod() != null)
 					sink_result.put(JsonConstants.sink_method, (def.getMethod().getSignature()));
+				else
+					sink_result.put(JsonConstants.source_method, "");
+				sink_result.put(JsonConstants.sink_access, "Type: " + res.getAccessPath().getBaseType().toString()
+						+ " + Value: " + res.getAccessPath().getPlainValue().toString());
 
 				JSONArray sources = new JSONArray();
 				int i2 = 1;
@@ -89,19 +93,28 @@ public class InfoflowResultsSerializerJson {
 					source_result.put(JsonConstants.source_class, classN2);
 					if (def2.getMethod() != null)
 						source_result.put(JsonConstants.source_method, (def2.getMethod().getSignature()));
+					else
+						source_result.put(JsonConstants.source_method, "");
+					source_result.put(JsonConstants.source_access, res2.getAccessPath().toString());
 					source_result.put(JsonConstants.source_line, res2.getStmt().getTag("LineNumberTag"));
 
 					JSONArray path = new JSONArray();
 					int order = 1;
 					for (Stmt s : res2.getPath()) {
+						JSONArray pathTaint = new JSONArray();
 						JSONObject stm_path = new JSONObject();
-						stm_path.put(order, s.toString());
+						stm_path.put(order,
+								"Statement: " + s.toString() + " + In method: " + this.icfg.getMethodOf(s).toString());
 						order++;
 						path.add(stm_path);
 					}
-
+					JSONObject sinkAgain = new JSONObject();
+					sinkAgain.put(order, res.getStmt().toString());
 					if (!path.isEmpty())
 						source_result.put(JsonConstants.path, path);
+					source_result.put(JsonConstants.source_access,
+							"Type: " + res2.getAccessPath().getBaseType().toString() + " + Value: "
+									+ res2.getAccessPath().getPlainValue().toString());
 					i2++;
 					sources.add(source_result);
 				}
