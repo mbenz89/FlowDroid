@@ -8,13 +8,13 @@ import java.io.IOException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import soot.SootMethod;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.InfoflowConfiguration;
 import soot.jimple.infoflow.results.InfoflowResults;
 import soot.jimple.infoflow.results.ResultSinkInfo;
 import soot.jimple.infoflow.results.ResultSourceInfo;
 import soot.jimple.infoflow.solver.cfg.IInfoflowCFG;
-import soot.jimple.infoflow.sourcesSinks.definitions.MethodSourceSinkDefinition;
 import soot.util.MultiMap;
 
 /**
@@ -69,14 +69,15 @@ public class InfoflowResultsSerializerJson {
 		if (map != null)
 			for (ResultSinkInfo res : map.keySet()) {
 				JSONObject sink_result = new JSONObject();
-				MethodSourceSinkDefinition def = (MethodSourceSinkDefinition) res.getDefinition();
+				Stmt sink = res.getStmt();
+				SootMethod sinkMethod = icfg.getMethodOf(sink);
 				sink_result.put(JsonConstants.result, i);
-				sink_result.put(JsonConstants.sink_stm, res.getStmt().toString());
-				String classN = icfg.getMethodOf(res.getStmt()).getDeclaringClass().getName();
+				sink_result.put(JsonConstants.sink_stm, sink.toString());
+				String classN = icfg.getMethodOf(sink).getDeclaringClass().getName();
 				sink_result.put(JsonConstants.sink_class, classN);
-				sink_result.put(JsonConstants.sink_line, (res.getStmt()).getTag("LineNumberTag"));
-				if (def.getMethod() != null)
-					sink_result.put(JsonConstants.sink_method, (def.getMethod().getSignature()));
+				sink_result.put(JsonConstants.sink_line, sink.getJavaSourceStartLineNumber());
+				if (sinkMethod != null)
+					sink_result.put(JsonConstants.sink_method, (sinkMethod.getSignature()));
 				else
 					sink_result.put(JsonConstants.source_method, "");
 				sink_result.put(JsonConstants.sink_access, "Type: " + res.getAccessPath().getBaseType().toString()
@@ -86,17 +87,18 @@ public class InfoflowResultsSerializerJson {
 				int i2 = 1;
 				for (ResultSourceInfo res2 : map.get(res)) {
 					JSONObject source_result = new JSONObject();
-					MethodSourceSinkDefinition def2 = (MethodSourceSinkDefinition) res2.getDefinition();
+					Stmt source = res2.getStmt();
+					SootMethod sourceMethod = icfg.getMethodOf(source);
 					source_result.put(JsonConstants.source, i2);
-					source_result.put(JsonConstants.source_stm, res2.getStmt().toString());
-					String classN2 = icfg.getMethodOf(res2.getStmt()).getDeclaringClass().getName();
+					source_result.put(JsonConstants.source_stm, source.toString());
+					String classN2 = icfg.getMethodOf(source).getDeclaringClass().getName();
 					source_result.put(JsonConstants.source_class, classN2);
-					if (def2.getMethod() != null)
-						source_result.put(JsonConstants.source_method, (def2.getMethod().getSignature()));
+					if (sourceMethod != null)
+						source_result.put(JsonConstants.source_method, (sourceMethod.getSignature()));
 					else
 						source_result.put(JsonConstants.source_method, "");
 					source_result.put(JsonConstants.source_access, res2.getAccessPath().toString());
-					source_result.put(JsonConstants.source_line, res2.getStmt().getTag("LineNumberTag"));
+					source_result.put(JsonConstants.source_line, source.getJavaSourceStartLineNumber());
 
 					JSONArray path = new JSONArray();
 					int order = 1;
@@ -104,7 +106,8 @@ public class InfoflowResultsSerializerJson {
 						JSONArray pathTaint = new JSONArray();
 						JSONObject stm_path = new JSONObject();
 						stm_path.put(order,
-								"Statement: " + s.toString() + " + In method: " + this.icfg.getMethodOf(s).toString());
+								"Statement: " + s.toString() + " + Line: " + s.getJavaSourceStartLineNumber()
+										+ " + Method: " + this.icfg.getMethodOf(s).toString());
 						order++;
 						path.add(stm_path);
 					}
