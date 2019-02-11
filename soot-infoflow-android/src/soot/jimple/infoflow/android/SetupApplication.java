@@ -34,6 +34,7 @@ import heros.solver.Pair;
 import soot.G;
 import soot.Main;
 import soot.PackManager;
+import soot.PhaseOptions;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -1083,6 +1084,8 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 		Options.v().set_keep_line_number(true);
 		Main.v().autoSetOptions();
 		configureCallgraph();
+
+		PhaseOptions.v().setPhaseOption("cg.spark","dump-html:true");
 
 		// Load whatever we need
 		logger.info("Loading dex files...");
