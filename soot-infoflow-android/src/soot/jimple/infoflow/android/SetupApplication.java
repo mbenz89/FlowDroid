@@ -1089,6 +1089,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
 		PhaseOptions.v().setPhaseOption("cg.spark","dump-pag:true");
 		PhaseOptions.v().setPhaseOption("cg.spark","dump-answer:true");
 		PhaseOptions.v().setPhaseOption("cg.spark","dump-solution:true");
+		Options.v().set_output_format(Options.output_format_jimple);
 
 		// Load whatever we need
 		logger.info("Loading dex files...");
