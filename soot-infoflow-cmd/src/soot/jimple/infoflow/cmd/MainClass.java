@@ -68,6 +68,7 @@ public class MainClass {
 	private static final String OPTION_ADDITIONAL_CLASSPATH = "ac";
 	private static final String OPTION_SKIP_APK_FILE = "si";
 	private static final String OPTION_JSON_FILE = "j";
+	private static final String OPTION_WRITE_JIMPLE_FILES = "wj";
 
 	// Timeouts
 	private static final String OPTION_TIMEOUT = "dt";
@@ -143,6 +144,7 @@ public class MainClass {
 				"Additional JAR file that shal be put on the classpath");
 		options.addOption(OPTION_SKIP_APK_FILE, "skipapkfile", true,
 				"APK file to skip when processing a directory of input files");
+		options.addOption(OPTION_WRITE_JIMPLE_FILES, "writejimplefiles", true, "Write out the Jimple files");
 
 		// Timeouts
 		options.addOption(OPTION_TIMEOUT, "timeout", true, "Timeout for the main data flow analysis");
@@ -673,6 +675,8 @@ public class MainClass {
 			if (additionalClasspath != null && !additionalClasspath.isEmpty())
 				config.getAnalysisFileConfig().setAdditionalClasspath(additionalClasspath);
 		}
+		if (cmd.hasOption(OPTION_WRITE_JIMPLE_FILES))
+			config.setWriteOutputFiles(true);
 
 		// Timeouts
 		{
